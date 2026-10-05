@@ -97,18 +97,18 @@ window.JA = window.JA || {};
         if (pointer.wasTouch) self.showTouchPad();
       });
 
-      this.addTouchButton(20, 200, '<', 'left');
-      this.addTouchButton(380, 200, '>', 'right');
-      this.addTouchButton(200, 214, 'SALTO', 'jump');
-      this.addTouchButton(360, 214, 'DISPARO', 'throw');
+      this.addTouchButton(16, 190, '<', 'left');
+      this.addTouchButton(384, 190, '>', 'right');
+      this.addTouchButton(200, 210, 'SALTO', 'jump');
+      this.addTouchButton(360, 210, 'DISPARO', 'throw');
     },
 
     addTouchButton: function (x, y, label, action) {
       var self = this;
       var w;
-      if (action === 'throw') w = 70;
-      else w = action.length > 1 ? 54 : 40;
-      var box = this.add.rectangle(x, y, w, 26, 0xffffff, 0.18)
+      if (action === 'throw') w = 84;
+      else w = action.length > 1 ? 64 : 54;
+      var box = this.add.rectangle(x, y, w, 36, 0xffffff, 0.18)
         .setScrollFactor(0)
         .setStrokeStyle(1, 0xffffff, 0.4)
         .setDepth(2)
@@ -119,8 +119,8 @@ window.JA = window.JA || {};
       }).setScrollFactor(0).setDepth(3).setVisible(false);
 
       // Hit area for a centred rectangle (origin 0.5, 0.5) must be centred too:
-      // local coords run from -w/2..w/2 and -h/2..h/2.
-      box.setInteractive(new Phaser.Geom.Rectangle(-w / 2, -13, w, 26), Phaser.Geom.Rectangle.Contains);
+      // local coords run from -w/2..w/2 and -h/2..h/2. Add small padding for touch.
+      box.setInteractive(new Phaser.Geom.Rectangle(-w / 2 - 6, -18, w + 12, 36), Phaser.Geom.Rectangle.Contains);
 
       // "Press" sets the flag the player controller reads; releasing clears it,
       // which is what lets a held jump actually work.
@@ -133,7 +133,8 @@ window.JA = window.JA || {};
         box.setFillStyle(0xffffff, 0.18);
       };
       box.on('pointerup', release);
-      box.on('pointerout', release);
+      box.on('pointerupoutside', release);
+      // pointerout removed — on mobile it fires too easily when finger shifts
 
       box.setData('action', action);
       this.touchButtons.push({ box: box, text: text });
