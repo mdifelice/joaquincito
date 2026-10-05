@@ -114,12 +114,6 @@ window.JA = window.JA || {};
         .setDepth(2)
         .setVisible(false);
 
-      // DEBUG: red semi-transparent overlay showing exact hit area
-      var debugBox = this.add.rectangle(x, y, w + 12, 36, 0xff0000, 0.25)
-        .setScrollFactor(0)
-        .setDepth(1)
-        .setVisible(false);
-
       var text = JA.font.text(this, x, y, label, {
         size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff
       }).setScrollFactor(0).setDepth(3).setVisible(false);
@@ -143,14 +137,13 @@ window.JA = window.JA || {};
       // pointerout removed — on mobile it fires too easily when finger shifts
 
       box.setData('action', action);
-      this.touchButtons.push({ box: box, text: text, debugBox: debugBox });
+      this.touchButtons.push({ box: box, text: text });
       return box;
     },
 
     showTouchPad: function () {
       this.touchButtons.forEach(function (b) {
         b.box.setVisible(true);
-        if (b.debugBox) b.debugBox.setVisible(true);
         b.text.setVisible(true);
       });
     },
@@ -225,7 +218,6 @@ window.JA = window.JA || {};
       if (!this.touchButtons) return;
       this.touchButtons.forEach(function (b) {
         b.box.input.enabled = !!on;
-        if (b.debugBox) b.debugBox.setVisible(!!on);
         if (on) b.box.input.cursor = 'default';
         if (!on) this.game$.touch[b.box.getData('action')] = false;
       }, this);
