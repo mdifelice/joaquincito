@@ -52,7 +52,7 @@ window.JA = window.JA || {};
       // --- Back to the title -------------------------------------------
       var back = this.add.rectangle(28, 220, 44, 18, 0xf8f0d0).setStrokeStyle(2, 0x8a5a28);
       JA.font.text(this, 28, 220, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0x30200c });
-      back.setInteractive(new Phaser.Geom.Rectangle(-22, -9, 44, 18), Phaser.Geom.Rectangle.Contains);
+      back.setInteractive();
       back.on('pointerdown', function () {
         JA.audio.play('back');
         self.scene.start('Title');
@@ -133,7 +133,7 @@ window.JA = window.JA || {};
         // Only open nodes respond to a click.
         if (!open) return;
 
-        icon.setInteractive(new Phaser.Geom.Rectangle(-8, -8, 16, 16), Phaser.Geom.Rectangle.Contains);
+        icon.setInteractive();
         icon.on('pointerdown', function () {
           JA.audio.play('confirm');
           // Entering a cuadra from the map mid-run keeps the clock running; with

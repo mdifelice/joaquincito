@@ -83,7 +83,7 @@ window.JA = window.JA || {};
       JA.font.text(this, x, y, label, { size: 2, originX: 0.5, originY: 0.5, tint: 0x30200c });
 
       // Fill changes on hover so it is obvious what is selected.
-      box.setInteractive(new Phaser.Geom.Rectangle(-w / 2, -h / 2, w, h), Phaser.Geom.Rectangle.Contains);
+      box.setInteractive();
       box.on('pointerover', function () { box.setFillStyle(0xf8d038); });
       box.on('pointerout', function () { box.setFillStyle(0xf8f0d0); });
       box.on('pointerdown', function () {
@@ -184,7 +184,7 @@ window.JA = window.JA || {};
               var on = value > step / STEPS;
               var cell = scene.add.rectangle(x + step * STEP_X, y, 6, 10, on ? 0x48a038 : 0xb0a890)
                 .setDepth(22)
-                .setInteractive(new Phaser.Geom.Rectangle(-3, -5, 6, 10), Phaser.Geom.Rectangle.Contains);
+                .setInteractive();
               cell.on('pointerdown', function () {
                 JA.audio.play('select');
                 var picked = step / STEPS;
@@ -215,7 +215,7 @@ window.JA = window.JA || {};
       // Back button.
       var back = this.add.rectangle(200, 168, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
       JA.font.text(this, 200, 168, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
-      back.setInteractive(new Phaser.Geom.Rectangle(-45, -10, 90, 20), Phaser.Geom.Rectangle.Contains);
+      back.setInteractive();
       back.on('pointerdown', function () {
         JA.audio.play('back');
         scene.scene.restart();
