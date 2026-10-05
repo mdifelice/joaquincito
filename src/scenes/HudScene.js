@@ -97,8 +97,8 @@ window.JA = window.JA || {};
         if (pointer.wasTouch) self.showTouchPad();
       });
 
-      this.addTouchButton(16, 190, '<', 'left');
-      this.addTouchButton(384, 190, '>', 'right');
+      this.addTouchButton(16, 170, '<', 'left');
+      this.addTouchButton(384, 170, '>', 'right');
       this.addTouchButton(200, 210, 'SALTO', 'jump');
       this.addTouchButton(360, 210, 'DISPARO', 'throw');
     },
@@ -400,7 +400,7 @@ window.JA = window.JA || {};
         size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff
       }).setScrollFactor(0).setDepth(panel.depth + 0.2);
 
-      box.setInteractive(new Phaser.Geom.Rectangle(0, 0, w, 20), Phaser.Geom.Rectangle.Contains);
+      box.setInteractive(new Phaser.Geom.Rectangle(-w / 2, -10, w, 20), Phaser.Geom.Rectangle.Contains);
       box.input.cursor = 'pointer';
       box.on('pointerover', function () { box.setFillStyle(0xf8a040); });
       box.on('pointerout', function () { box.setFillStyle(0xe8603c); });
