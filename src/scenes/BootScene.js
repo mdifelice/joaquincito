@@ -41,6 +41,12 @@ window.JA = window.JA || {};
       //    window so they survive the scene change below — see unlockOnInput.
       this.unlockOnInput();
 
+      // 5. Request landscape on mobile (best-effort; browsers only honor after
+      //    a user gesture, which we get from unlockOnInput's listeners).
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape-primary').catch(function () {});
+      }
+
       this.scene.start('Title');
     },
 

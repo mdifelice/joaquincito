@@ -31,7 +31,10 @@ window.JA = window.JA || {};
 
     scale: {
       mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      // On mobile, force landscape so the HUD and touch pad are always usable.
+      orientation: Phaser.Scale.Orientation.LANDSCAPE,
+      expandParent: true
     },
 
     // Arcade physics, tuned for small chunky tiles: enough gravity to feel

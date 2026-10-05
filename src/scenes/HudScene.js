@@ -94,8 +94,8 @@ window.JA = window.JA || {};
 
       this.addTouchButton(34, 200, '<', 'left');
       this.addTouchButton(366, 200, '>', 'right');
-      this.addTouchButton(200, 214, 'SALTO', 'jump');
-      this.addTouchButton(324, 214, 'DISPARO', 'throw');
+      this.addTouchButton(280, 214, 'SALTO', 'jump');
+      this.addTouchButton(360, 214, 'DISPARO', 'throw');
     },
 
     addTouchButton: function (x, y, label, action) {
