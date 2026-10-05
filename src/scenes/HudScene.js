@@ -88,6 +88,11 @@ window.JA = window.JA || {};
       var self = this;
       this.touchButtons = [];
 
+      // Detect touch capability and show the pad immediately on touch devices
+      // so buttons are visible without waiting for the first tap.
+      var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (isTouch) this.showTouchPad();
+
       this.input.on('pointerdown', function (pointer) {
         if (pointer.wasTouch) self.showTouchPad();
       });
@@ -113,9 +118,9 @@ window.JA = window.JA || {};
         size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff
       }).setScrollFactor(0).setDepth(3).setVisible(false);
 
-      // Hit-area coordinates are in texture space (0..w, 0..h), not relative to
-      // the centre, so a centred object still uses a top-left anchored rect.
-      box.setInteractive(new Phaser.Geom.Rectangle(0, 0, w, 26), Phaser.Geom.Rectangle.Contains);
+      // Hit area for a centred rectangle (origin 0.5, 0.5) must be centred too:
+      // local coords run from -w/2..w/2 and -h/2..h/2.
+      box.setInteractive(new Phaser.Geom.Rectangle(-w / 2, -13, w, 26), Phaser.Geom.Rectangle.Contains);
 
       // "Press" sets the flag the player controller reads; releasing clears it,
       // which is what lets a held jump actually work.
