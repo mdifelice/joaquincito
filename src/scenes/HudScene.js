@@ -118,9 +118,7 @@ window.JA = window.JA || {};
         size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff
       }).setScrollFactor(0).setDepth(3).setVisible(false);
 
-      // Hit area for a centred rectangle (origin 0.5, 0.5) must be centred too:
-      // local coords run from -w/2..w/2 and -h/2..h/2. Add small padding for touch.
-      box.setInteractive(new Phaser.Geom.Rectangle(-w / 2 - 6, -18, w + 12, 36), Phaser.Geom.Rectangle.Contains);
+      box.setInteractive();
 
       // "Press" sets the flag the player controller reads; releasing clears it,
       // which is what lets a held jump actually work.
@@ -400,7 +398,7 @@ window.JA = window.JA || {};
         size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff
       }).setScrollFactor(0).setDepth(panel.depth + 0.2);
 
-      box.setInteractive(new Phaser.Geom.Rectangle(-w / 2, -10, w, 20), Phaser.Geom.Rectangle.Contains);
+      box.setInteractive();
       box.input.cursor = 'pointer';
       box.on('pointerover', function () { box.setFillStyle(0xf8a040); });
       box.on('pointerout', function () { box.setFillStyle(0xe8603c); });
