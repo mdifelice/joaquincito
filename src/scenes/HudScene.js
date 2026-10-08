@@ -101,6 +101,15 @@ window.JA = window.JA || {};
       this.addTouchButton(384, 170, '>', 'right');
       this.addTouchButton(200, 210, 'SALTO', 'jump');
       this.addTouchButton(360, 210, 'DISPARO', 'throw');
+
+      // Multi-touch: single full-screen transparent overlay to track all fingers.
+      // Each frame, check which button area each active pointer is over.
+      // This avoids the native multi-touch limitation where separate interactive
+      // objects don't receive simultaneous pointerdown events.
+      this.touchOverlay = this.add.rectangle(200, 120, 400, 240, 0x000000, 0)
+        .setScrollFactor(0)
+        .setDepth(100)
+        .setInteractive();
     },
 
     addTouchButton: function (x, y, label, action) {
@@ -118,21 +127,9 @@ window.JA = window.JA || {};
         size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff
       }).setScrollFactor(0).setDepth(3).setVisible(false);
 
-      box.setInteractive();
-
-      // "Press" sets the flag the player controller reads; releasing clears it,
-      // which is what lets a held jump actually work.
-      box.on('pointerdown', function () {
-        self.game$.touch[action] = true;
-        box.setFillStyle(0xffffff, 0.4);
-      });
-      var release = function () {
-        self.game$.touch[action] = false;
-        box.setFillStyle(0xffffff, 0.18);
-      };
-      box.on('pointerup', release);
-      box.on('pointerupoutside', release);
-      // pointerout removed — on mobile it fires too easily when finger shifts
+      // Hit area handled by the global touchOverlay in update().
+      // Disable individual interactivity to avoid multi-touch conflicts.
+      // box.setInteractive(); // Disabled — handled by touchOverlay
 
       box.setData('action', action);
       this.touchButtons.push({ box: box, text: text });
@@ -213,12 +210,15 @@ window.JA = window.JA || {};
 
     /** Turn the on-screen controls off while a panel is covering the screen. */
     setTouchPadEnabled: function (on) {
-      if (!this.touchButtons) return;
-      this.touchButtons.forEach(function (b) {
-        b.box.input.enabled = !!on;
-        if (on) b.box.input.cursor = 'default';
-        if (!on) this.game$.touch[b.box.getData('action')] = false;
-      }, this);
+      if (!this.touchOverlay) return;
+      this.touchOverlay.input.enabled = !!on;
+      if (!on && this.game$) {
+        var touch = this.game$.touch;
+        touch.left = false;
+        touch.right = false;
+        touch.jump = false;
+        touch.throw = false;
+      }
     },
 
     /* ---------------------------------------------------------------- */
@@ -453,6 +453,51 @@ window.JA = window.JA || {};
       if (!game) return;
       var label = game.power ? (game.power === 'fire' ? 'FUEGO  ESPACIO' : 'HIELO  ESPACIO') : '';
       if (this.powerText) this.powerText.text = label;
+    },
+
+    // Multi-touch handler: each frame, check all active pointers against the
+    // button areas and set/clear touch flags. This enables holding one button
+    // (e.g., right) while tapping another (e.g., jump or fire).
+    update: function () {
+      if (!this.touchOverlay || !this.touchOverlay.input) return;
+
+      // Clear all touch flags first.
+      var touch = this.game$ ? this.game$.touch : null;
+      if (touch) {
+        touch.left = false;
+        touch.right = false;
+        touch.jump = false;
+        touch.throw = false;
+      }
+
+      // For each active pointer, check which button it's over.
+      var pointers = this.input.manager.pointers;
+      for (var i = 0; i < pointers.length; i++) {
+        var p = pointers[i];
+        if (!p.isDown) continue;
+
+        var x = p.x, y = p.y;
+        for (var j = 0; j < this.touchButtons.length; j++) {
+          var btn = this.touchButtons[j];
+          var bx = btn.box.x, by = btn.box.y;
+          var bw = btn.box.width, bh = btn.box.height;
+          if (x >= bx - bw / 2 && x <= bx + bw / 2 &&
+              y >= by - btn.box.height / 2 && y <= by + btn.box.height / 2) {
+            var action = btn.box.getData('action');
+            if (touch && action) touch[action] = true;
+            btn.box.setFillStyle(0xffffff, 0.4);
+            break;
+          }
+        }
+      }
+
+      // Update button visuals for buttons not currently pressed.
+      for (var k = 0; k < this.touchButtons.length; k++) {
+        var b = this.touchButtons[k];
+        var act = b.box.getData('action');
+        var isPressed = touch && touch[act];
+        if (!isPressed) b.box.setFillStyle(0xffffff, 0.18);
+      }
     }
   });
 
