@@ -64,37 +64,43 @@ window.JA = window.JA || {};
 
       this.timeText = this.addCounter(392, 5, '9:00:00', 0xffffff, 1);
 
-      // Full-screen toggle button (top-right).
+      // Full-screen toggle button (top-right, next to time).
+      var self = this;
       this.fullscreenBtn = this.add.rectangle(372, 11, 30, 16, 0xffffff, 0.1)
-        .setStrokeStyle(1, 0xffffff, 0.4)
+        .setStrokeStyle(1, 0xffffff, 0.5)
         .setScrollFactor(0)
         .setDepth(1)
-        .setInteractive();
-      // Simple fullscreen icon: expanding corners.
+        .setInteractive({ useHandCursor: true });
+      // Fullscreen icon: expanding/collapsing corners.
       var fsIcon = this.add.graphics().setScrollFactor(0).setDepth(2);
-      fsIcon.lineStyle(2, 0xffffff, 1);
-      fsIcon.strokeRect(357, -4, 30, 30);
-      fsIcon.moveTo(372, 4); fsIcon.lineTo(378, 4); fsIcon.moveTo(385, 4); fsIcon.lineTo(385, 10);
-      fsIcon.moveTo(372, 17); fsIcon.lineTo(378, 17); fsIcon.moveTo(385, 17); fsIcon.lineTo(385, 11);
-      this.fullscreenBtn.on('pointerdown', function () {
-        if (this.scale.isFullscreen) this.scale.stopFullscreen();
-        else this.scale.startFullscreen();
-      }, this);
-      this.scale.on('fullscreenchange', function () {
+      var drawIcon = function (expanded) {
         fsIcon.clear();
         fsIcon.lineStyle(2, 0xffffff, 1);
-        if (this.scale.isFullscreen) {
-          // Collapse icon
-          fsIcon.strokeRect(357, -4, 30, 30);
-          fsIcon.moveTo(372, 11); fsIcon.lineTo(378, 11); fsIcon.moveTo(378, 4); fsIcon.lineTo(378, 11); fsIcon.lineTo(385, 11);
-          fsIcon.moveTo(372, 11); fsIcon.lineTo(378, 11); fsIcon.lineTo(378, 17); fsIcon.lineTo(378, 11); fsIcon.lineTo(365, 11);
+        var cx = 372, cy = 11, s = 10;
+        if (expanded) {
+          // Four corners pointing out
+          fsIcon.strokeRect(cx - s/2 - 5, cy - s/2 - 5, s + 10, s + 10);
+          fsIcon.moveTo(cx, cy - s/2 - 5); fsIcon.lineTo(cx, cy - s/2 - 10);
+          fsIcon.moveTo(cx + s/2 + 10, cy); fsIcon.lineTo(cx + s/2 + 15, cy);
+          fsIcon.moveTo(cx, cy + s/2 + 5); fsIcon.lineTo(cx, cy + s/2 + 10);
+          fsIcon.moveTo(cx - s/2 - 10, cy); fsIcon.lineTo(cx - s/2 - 15, cy);
         } else {
-          // Expand icon
-          fsIcon.strokeRect(357, -4, 30, 30);
-          fsIcon.moveTo(372, 4); fsIcon.lineTo(378, 4); fsIcon.moveTo(385, 4); fsIcon.lineTo(385, 10);
-          fsIcon.moveTo(372, 17); fsIcon.lineTo(378, 17); fsIcon.moveTo(385, 17); fsIcon.lineTo(385, 11);
+          // Four corners pointing in
+          fsIcon.strokeRect(cx - s/2 - 5, cy - s/2 - 5, s + 10, s + 10);
+          fsIcon.moveTo(cx - s/2 - 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy - s/2 - 5);
+          fsIcon.moveTo(cx + s/2 + 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy - s/2 - 5);
+          fsIcon.moveTo(cx - s/2 - 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy + s/2 + 5);
+          fsIcon.moveTo(cx + s/2 + 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy + s/2 + 5);
         }
-      }, this);
+      };
+      drawIcon(false);
+      this.fullscreenBtn.on('pointerdown', function () {
+        if (self.scale.isFullscreen) self.scale.stopFullscreen();
+        else self.scale.startFullscreen();
+      });
+      self.scale.on('fullscreenchange', function () {
+        drawIcon(self.scale.isFullscreen);
+      });
     },
 
     /** A label whose value is rebuilt on demand, not every frame. */
@@ -503,13 +509,18 @@ window.JA = window.JA || {};
       }
 
       // For each active touch pointer, check which button it's over.
-      // Use input.pointers (Phaser 3.50+) which includes all active pointers.
-      var pointers = this.input.pointers || this.input.manager.pointers;
+      // Combine input.pointers (modern) and manager.pointers (legacy) to catch all.
+      var pointers = [];
+      if (this.input.pointers) pointers = pointers.concat(this.input.pointers);
+      if (this.input.manager && this.input.manager.pointers) pointers = pointers.concat(this.input.manager.pointers);
+
       for (var i = 0; i < pointers.length; i++) {
         var p = pointers[i];
         if (!p.isDown) continue;
-        // Skip mouse pointer (pointerType === 'mouse')
+        // Skip mouse pointer
         if (p.pointerType === 'mouse') continue;
+        // Also skip if it's a touch pointer but not a touch event
+        if (p.pointerType === 'touch' && !p.touch) continue;
 
         var x = p.x, y = p.y;
         for (var j = 0; j < this.touchButtons.length; j++) {
