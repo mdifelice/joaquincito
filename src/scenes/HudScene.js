@@ -63,6 +63,38 @@ window.JA = window.JA || {};
       this.levelTitle = title;
 
       this.timeText = this.addCounter(392, 5, '9:00:00', 0xffffff, 1);
+
+      // Full-screen toggle button (top-right).
+      this.fullscreenBtn = this.add.rectangle(372, 11, 30, 16, 0xffffff, 0.1)
+        .setStrokeStyle(1, 0xffffff, 0.4)
+        .setScrollFactor(0)
+        .setDepth(1)
+        .setInteractive();
+      // Simple fullscreen icon: expanding corners.
+      var fsIcon = this.add.graphics().setScrollFactor(0).setDepth(2);
+      fsIcon.lineStyle(2, 0xffffff, 1);
+      fsIcon.strokeRect(357, -4, 30, 30);
+      fsIcon.moveTo(372, 4); fsIcon.lineTo(378, 4); fsIcon.moveTo(385, 4); fsIcon.lineTo(385, 10);
+      fsIcon.moveTo(372, 17); fsIcon.lineTo(378, 17); fsIcon.moveTo(385, 17); fsIcon.lineTo(385, 11);
+      this.fullscreenBtn.on('pointerdown', function () {
+        if (this.scale.isFullscreen) this.scale.stopFullscreen();
+        else this.scale.startFullscreen();
+      }, this);
+      this.scale.on('fullscreenchange', function () {
+        fsIcon.clear();
+        fsIcon.lineStyle(2, 0xffffff, 1);
+        if (this.scale.isFullscreen) {
+          // Collapse icon
+          fsIcon.strokeRect(357, -4, 30, 30);
+          fsIcon.moveTo(372, 11); fsIcon.lineTo(378, 11); fsIcon.moveTo(378, 4); fsIcon.lineTo(378, 11); fsIcon.lineTo(385, 11);
+          fsIcon.moveTo(372, 11); fsIcon.lineTo(378, 11); fsIcon.lineTo(378, 17); fsIcon.lineTo(378, 11); fsIcon.lineTo(365, 11);
+        } else {
+          // Expand icon
+          fsIcon.strokeRect(357, -4, 30, 30);
+          fsIcon.moveTo(372, 4); fsIcon.lineTo(378, 4); fsIcon.moveTo(385, 4); fsIcon.lineTo(385, 10);
+          fsIcon.moveTo(372, 17); fsIcon.lineTo(378, 17); fsIcon.moveTo(385, 17); fsIcon.lineTo(385, 11);
+        }
+      }, this);
     },
 
     /** A label whose value is rebuilt on demand, not every frame. */
