@@ -47,7 +47,7 @@ window.JA = window.JA || {};
       // `active` is false when there is no run in progress (fresh save, or the
       // run has been judged).
       run: { elapsedMs: 0, active: false },
-      settings: { music: 0.5, sfx: 0.7 }
+      settings: { music: 0.5, sfx: 0.7, paused: false }
     };
   }
 
@@ -287,6 +287,13 @@ window.JA = window.JA || {};
 
   save.setSfxVolume = function (v) {
     data.settings.sfx = num(v, 0.7, 0, 1);
+    save.flush();
+  };
+
+  save.setSettings = function (s) {
+    if (s.music !== undefined) data.settings.music = num(s.music, 0.5, 0, 1);
+    if (s.sfx !== undefined) data.settings.sfx = num(s.sfx, 0.7, 0, 1);
+    if (s.paused !== undefined) data.settings.paused = !!s.paused;
     save.flush();
   };
 

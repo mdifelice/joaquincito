@@ -147,31 +147,19 @@ window.JA = window.JA || {};
       var backdrop = this.add.rectangle(200, 120, 400, 240, 0x000000, 0.6).setInteractive();
       backdrop.setDepth(20);
 
-      var panel = this.add.rectangle(200, 120, 240, 130, 0xf8f0d0).setStrokeStyle(3, 0x8a5a28).setDepth(21);
+      var panel = this.add.rectangle(200, 120, 280, 140, 0xf8f0d0).setStrokeStyle(3, 0x8a5a28).setDepth(21);
 
-      var title = JA.font.text(this, 200, 66, 'AJUSTES', { size: 2, originX: 0.5, tint: 0x30200c }).setDepth(22);
+      var title = JA.font.text(this, 200, 60, 'AJUSTES', { size: 2, originX: 0.5, tint: 0x30200c }).setDepth(22);
 
-      JA.font.text(this, 130, 100, 'MUSICA', { size: 1, originX: 0.5, tint: 0x30200c }).setDepth(22);
-      JA.font.text(this, 130, 128, 'SONIDOS', { size: 1, originX: 0.5, tint: 0x30200c }).setDepth(22);
+      // Labels aligned with bars (left of bar).
+      var labelX = 80, barX = 130;
+      JA.font.text(this, labelX, 92, 'MUSICA', { size: 1, originX: 1, originY: 0.5, tint: 0x30200c }).setDepth(22);
+      JA.font.text(this, labelX, 120, 'SONIDOS', { size: 1, originX: 1, originY: 0.5, tint: 0x30200c }).setDepth(22);
 
-      // Volume bars: eleven little squares, clicked to set a level. The extra
-      // square at the far left is zero, so it is possible to mute completely.
+      // Volume bars: eleven little squares, clicked to set a level.
       var STEPS = 11;
       var STEP_X = 8;
 
-      /**
-       * Build one volume bar and return a function that redraws it.
-       *
-       * Each bar keeps its own cell list in this closure. Sharing one list
-       * between the two bars would mean drawing the second one destroys the
-       * first, leaving its row dead.
-       *
-       * Each cell also captures its own step: a `var` loop variable is shared
-       * by every handler, so clicking any square would set the volume from the
-       * value the loop happened to finish on. Redrawing destroys the previous
-       * squares, otherwise every click stacks another bar on top and the
-       * stale cells underneath keep swallowing the clicks.
-       */
       var makeBar = function (x, y, onPick) {
         var cells = [];
 
@@ -199,13 +187,13 @@ window.JA = window.JA || {};
         return redraw;
       };
 
-      var musicBar = makeBar(150, 100, function (v) {
+      var musicBar = makeBar(barX, 92, function (v) {
         JA.save.setMusicVolume(v);
         JA.audio.setMusicVolume(v);
       });
       musicBar(settings.music);
 
-      var sfxBar = makeBar(150, 128, function (v) {
+      var sfxBar = makeBar(barX, 120, function (v) {
         JA.save.setSfxVolume(v);
         JA.audio.setSfxVolume(v);
         JA.audio.play('coin');
@@ -213,13 +201,14 @@ window.JA = window.JA || {};
       sfxBar(settings.sfx);
 
       // Back button.
-      var back = this.add.rectangle(200, 168, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
-      JA.font.text(this, 200, 168, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
+      var back = this.add.rectangle(200, 160, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
+      JA.font.text(this, 200, 160, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
       back.setInteractive();
       back.on('pointerdown', function () {
         JA.audio.play('back');
-        scene.scene.restart();
-      });
+        this.modalOpen = false;
+        this.scene.restart();
+      }, this);
     },
 
     startLevel: function (levelNumber, elapsed) {

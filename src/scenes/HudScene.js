@@ -64,10 +64,10 @@ window.JA = window.JA || {};
 
       this.timeText = this.addCounter(392, 5, '9:00:00', 0xffffff, 1);
 
-      // Full-screen toggle button (top-right, next to time).
+      // Full-screen toggle button (left of clock, with comfortable spacing).
       var self = this;
-      this.fullscreenBtn = this.add.rectangle(372, 11, 30, 16, 0xffffff, 0.1)
-        .setStrokeStyle(1, 0xffffff, 0.5)
+      this.fullscreenBtn = this.add.rectangle(350, 11, 30, 16, 0x000000, 0.3)
+        .setStrokeStyle(1, 0xffffff, 0.7)
         .setScrollFactor(0)
         .setDepth(1)
         .setInteractive({ useHandCursor: true });
@@ -76,7 +76,7 @@ window.JA = window.JA || {};
       var drawIcon = function (expanded) {
         fsIcon.clear();
         fsIcon.lineStyle(2, 0xffffff, 1);
-        var cx = 372, cy = 11, s = 10;
+        var cx = 350, cy = 11, s = 10;
         if (expanded) {
           // Four corners pointing out
           fsIcon.strokeRect(cx - s/2 - 5, cy - s/2 - 5, s + 10, s + 10);
@@ -95,8 +95,9 @@ window.JA = window.JA || {};
       };
       drawIcon(false);
       this.fullscreenBtn.on('pointerdown', function () {
-        if (self.scale.isFullscreen) self.scale.stopFullscreen();
-        else self.scale.startFullscreen();
+        // Fullscreen API requires a trusted user gesture; pointerdown qualifies.
+        var promise = self.scale.isFullscreen ? self.scale.stopFullscreen() : self.scale.startFullscreen();
+        if (promise && promise.catch) promise.catch(function () {});
       });
       self.scale.on('fullscreenchange', function () {
         drawIcon(self.scale.isFullscreen);
@@ -135,19 +136,63 @@ window.JA = window.JA || {};
         if (pointer.wasTouch) self.showTouchPad();
       });
 
+      // Native touch events on canvas for true multi-touch (Phaser's pointer
+      // system only tracks primary touch on some mobile browsers).
+      var canvas = this.sys.game.canvas;
+      this._nativeTouchHandler = function (e) {
+        var touches = e.touches || e.changedTouches;
+        var touch = self.game$ ? self.game$.touch : null;
+        if (!touch) return;
+
+        // Clear all touch flags first.
+        touch.left = false;
+        touch.right = false;
+        touch.jump = false;
+        touch.throw = false;
+
+        for (var i = 0; i < touches.length; i++) {
+          var t = touches[i];
+          // Convert to Phaser's coordinate system (same as pointer.x/pointer.y)
+          var rect = canvas.getBoundingClientRect();
+          var scaleX = canvas.width / rect.width;
+          var scaleY = canvas.height / rect.height;
+          var x = (t.clientX - rect.left) * scaleX;
+          var y = (t.clientY - rect.top) * scaleY;
+
+          for (var j = 0; j < self.touchButtons.length; j++) {
+            var btn = self.touchButtons[j];
+            var bx = btn.box.x, by = btn.box.y;
+            var bw = btn.box.width, bh = btn.box.height;
+            if (x >= bx - bw / 2 && x <= bx + bw / 2 &&
+                y >= by - bh / 2 && y <= by + bh / 2) {
+              var action = btn.box.getData('action');
+              if (action) touch[action] = true;
+              btn.box.setFillStyle(0xffffff, 0.4);
+              break;
+            }
+          }
+        }
+
+        // Update button visuals for buttons not currently pressed.
+        for (var k = 0; k < self.touchButtons.length; k++) {
+          var b = self.touchButtons[k];
+          var act = b.box.getData('action');
+          var isPressed = touch && touch[act];
+          if (!isPressed) b.box.setFillStyle(0xffffff, 0.18);
+        }
+
+        // Prevent page scrolling while using controls
+        e.preventDefault();
+      };
+      canvas.addEventListener('touchstart', self._nativeTouchHandler, { passive: false });
+      canvas.addEventListener('touchmove', self._nativeTouchHandler, { passive: false });
+      canvas.addEventListener('touchend', self._nativeTouchHandler, { passive: false });
+      canvas.addEventListener('touchcancel', self._nativeTouchHandler, { passive: false });
+
       this.addTouchButton(16, 170, '<', 'left');
       this.addTouchButton(384, 170, '>', 'right');
       this.addTouchButton(200, 210, 'SALTO', 'jump');
       this.addTouchButton(360, 210, 'DISPARO', 'throw');
-
-      // Multi-touch: single full-screen transparent overlay to track all fingers.
-      // Each frame, check which button area each active pointer is over.
-      // This avoids the native multi-touch limitation where separate interactive
-      // objects don't receive simultaneous pointerdown events.
-      this.touchOverlay = this.add.rectangle(200, 120, 400, 240, 0x000000, 0)
-        .setScrollFactor(0)
-        .setDepth(100)
-        .setInteractive();
     },
 
     addTouchButton: function (x, y, label, action) {
@@ -493,56 +538,14 @@ window.JA = window.JA || {};
       if (this.powerText) this.powerText.text = label;
     },
 
-    // Multi-touch handler: each frame, check all active pointers against the
-    // button areas and set/clear touch flags. This enables holding one button
-    // (e.g., right) while tapping another (e.g., jump or fire).
-    update: function () {
-      if (!this.touchOverlay || !this.touchOverlay.input) return;
-
-      // Clear all touch flags first.
-      var touch = this.game$ ? this.game$.touch : null;
-      if (touch) {
-        touch.left = false;
-        touch.right = false;
-        touch.jump = false;
-        touch.throw = false;
-      }
-
-      // For each active touch pointer, check which button it's over.
-      // Combine input.pointers (modern) and manager.pointers (legacy) to catch all.
-      var pointers = [];
-      if (this.input.pointers) pointers = pointers.concat(this.input.pointers);
-      if (this.input.manager && this.input.manager.pointers) pointers = pointers.concat(this.input.manager.pointers);
-
-      for (var i = 0; i < pointers.length; i++) {
-        var p = pointers[i];
-        if (!p.isDown) continue;
-        // Skip mouse pointer
-        if (p.pointerType === 'mouse') continue;
-        // Also skip if it's a touch pointer but not a touch event
-        if (p.pointerType === 'touch' && !p.touch) continue;
-
-        var x = p.x, y = p.y;
-        for (var j = 0; j < this.touchButtons.length; j++) {
-          var btn = this.touchButtons[j];
-          var bx = btn.box.x, by = btn.box.y;
-          var bw = btn.box.width, bh = btn.box.height;
-          if (x >= bx - bw / 2 && x <= bx + bw / 2 &&
-              y >= by - bh / 2 && y <= by + bh / 2) {
-            var action = btn.box.getData('action');
-            if (touch && action) touch[action] = true;
-            btn.box.setFillStyle(0xffffff, 0.4);
-            break;
-          }
-        }
-      }
-
-      // Update button visuals for buttons not currently pressed.
-      for (var k = 0; k < this.touchButtons.length; k++) {
-        var b = this.touchButtons[k];
-        var act = b.box.getData('action');
-        var isPressed = touch && touch[act];
-        if (!isPressed) b.box.setFillStyle(0xffffff, 0.18);
+    // Clean up native touch listeners on shutdown.
+    shutdown: function () {
+      if (this._nativeTouchHandler) {
+        var canvas = this.sys.game.canvas;
+        canvas.removeEventListener('touchstart', this._nativeTouchHandler);
+        canvas.removeEventListener('touchmove', this._nativeTouchHandler);
+        canvas.removeEventListener('touchend', this._nativeTouchHandler);
+        canvas.removeEventListener('touchcancel', this._nativeTouchHandler);
       }
     }
   });
