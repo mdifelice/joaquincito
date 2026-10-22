@@ -470,11 +470,14 @@ window.JA = window.JA || {};
         touch.throw = false;
       }
 
-      // For each active pointer, check which button it's over.
-      var pointers = this.input.manager.pointers;
+      // For each active touch pointer, check which button it's over.
+      // Use input.pointers (Phaser 3.50+) which includes all active pointers.
+      var pointers = this.input.pointers || this.input.manager.pointers;
       for (var i = 0; i < pointers.length; i++) {
         var p = pointers[i];
         if (!p.isDown) continue;
+        // Skip mouse pointer (pointerType === 'mouse')
+        if (p.pointerType === 'mouse') continue;
 
         var x = p.x, y = p.y;
         for (var j = 0; j < this.touchButtons.length; j++) {
@@ -482,7 +485,7 @@ window.JA = window.JA || {};
           var bx = btn.box.x, by = btn.box.y;
           var bw = btn.box.width, bh = btn.box.height;
           if (x >= bx - bw / 2 && x <= bx + bw / 2 &&
-              y >= by - btn.box.height / 2 && y <= by + btn.box.height / 2) {
+              y >= by - bh / 2 && y <= by + bh / 2) {
             var action = btn.box.getData('action');
             if (touch && action) touch[action] = true;
             btn.box.setFillStyle(0xffffff, 0.4);
