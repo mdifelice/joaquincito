@@ -189,13 +189,14 @@ window.JA = window.JA || {};
         return redraw;
       };
 
-      var musicBar = makeBar(barX, 96, function (v) {
+      // Bars moved down 30px from labels for clear separation.
+      var musicBar = makeBar(barX, 126, function (v) {
         JA.save.setMusicVolume(v);
         JA.audio.setMusicVolume(v);
       });
       musicBar(settings.music);
 
-      var sfxBar = makeBar(barX, 128, function (v) {
+      var sfxBar = makeBar(barX, 158, function (v) {
         JA.save.setSfxVolume(v);
         JA.audio.setSfxVolume(v);
         JA.audio.play('coin');
@@ -203,8 +204,8 @@ window.JA = window.JA || {};
       sfxBar(settings.sfx);
 
       // Back button.
-      var back = this.add.rectangle(200, 168, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
-      JA.font.text(this, 200, 168, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
+      var back = this.add.rectangle(200, 200, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
+      JA.font.text(this, 200, 200, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
       back.setInteractive();
       back.on('pointerdown', function () {
         JA.audio.play('back');

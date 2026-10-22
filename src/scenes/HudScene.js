@@ -64,18 +64,18 @@ window.JA = window.JA || {};
 
       this.timeText = this.addCounter(392, 5, '9:00:00', 0xffffff, 1);
 
-      // Full-screen toggle button (left of clock).
+      // Full-screen toggle button (far left of HUD).
       var self = this;
       var isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-      this.fullscreenBtn = this.add.rectangle(350, 11, 30, 16, 0x000000, 0.4)
+      this.fullscreenBtn = this.add.rectangle(50, 11, 30, 16, 0x000000, 0.4)
         .setStrokeStyle(1, 0xffffff, 0.7)
         .setScrollFactor(0)
         .setDepth(1)
         .setInteractive({ useHandCursor: true });
 
-      // Show "F" key hint on desktop, simple icon on mobile.
-      var fsText = this.add.text(350, 11, isMobile ? '' : 'F', {
+      // Show "F" key hint on desktop.
+      var fsText = this.add.text(50, 11, isMobile ? '' : 'F', {
         fontFamily: 'monospace',
         fontSize: '10px',
         color: '#ffffff',
@@ -100,9 +100,7 @@ window.JA = window.JA || {};
             if (p && p.catch) p.catch(function () {});
           }
         };
-        // Request on first touch/click anywhere.
         self.input.once('pointerdown', requestFullscreen);
-        // Also try when the scene is shown (covers keyboard F11 etc).
         self.events.once('wake', requestFullscreen);
       }
     },
@@ -263,11 +261,11 @@ window.JA = window.JA || {};
         .setDepth(depth)
         .setVisible(false);
 
-      // Move card up by 20px so bottom buttons have more margin.
-      var card = this.add.rectangle(200, 100, 250, 176, 0xf8f0d0)
+      // Move card up by 40px so bottom buttons have more margin from edge.
+      var card = this.add.rectangle(200, 80, 250, 176, 0xf8f0d0)
         .setScrollFactor(0)
         .setStrokeStyle(3, 0x8a5a28)
-        .setDepth(depth + 0.1)
+        .setDepth(depth + 10)  // Higher depth so level header never overlaps
         .setVisible(false);
 
       return { backdrop: backdrop, card: card, depth: depth, items: [] };
