@@ -476,17 +476,18 @@ window.JA = window.JA || {};
       }));
     },
 
-    addPanelButton: function (panel, x, y, label, onClick) {
+    addPanelButton: function (panel, x, y, label, onClick, depthOffset) {
+      if (depthOffset === undefined) depthOffset = 11;
       var w = Math.max(120, JA.font.measure(label, 1) + 20);
 
       var box = this.add.rectangle(x, y, w, 20, 0xe8603c)
         .setScrollFactor(0)
         .setStrokeStyle(2, 0x8a2c14)
-        .setDepth(panel.depth + 0.15);
+        .setDepth(panel.depth + depthOffset);
 
       var text = JA.font.text(this, x, y, label, {
         size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff
-      }).setScrollFactor(0).setDepth(panel.depth + 0.2);
+      }).setScrollFactor(0).setDepth(panel.depth + depthOffset + 0.05);
 
       box.setInteractive();
       box.input.cursor = 'pointer';
@@ -501,6 +502,7 @@ window.JA = window.JA || {};
       // used to be left behind: the box was destroyed on hide but its text was
       // not, so old labels piled up on later panels and their hover colours
       // were buried under stale text.
+      panel.items.push(box);
       panel.items.push(text);
 
       return box;
