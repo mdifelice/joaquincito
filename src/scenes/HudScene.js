@@ -64,44 +64,47 @@ window.JA = window.JA || {};
 
       this.timeText = this.addCounter(392, 5, '9:00:00', 0xffffff, 1);
 
-      // Full-screen toggle button (left of clock, with comfortable spacing).
+      // Full-screen toggle button (left of clock).
       var self = this;
-      this.fullscreenBtn = this.add.rectangle(350, 11, 30, 16, 0x000000, 0.3)
+      var isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+      this.fullscreenBtn = this.add.rectangle(350, 11, 30, 16, 0x000000, 0.4)
         .setStrokeStyle(1, 0xffffff, 0.7)
         .setScrollFactor(0)
         .setDepth(1)
         .setInteractive({ useHandCursor: true });
-      // Fullscreen icon: expanding/collapsing corners.
-      var fsIcon = this.add.graphics().setScrollFactor(0).setDepth(2);
-      var drawIcon = function (expanded) {
-        fsIcon.clear();
-        fsIcon.lineStyle(2, 0xffffff, 1);
-        var cx = 350, cy = 11, s = 10;
-        if (expanded) {
-          // Four corners pointing out
-          fsIcon.strokeRect(cx - s/2 - 5, cy - s/2 - 5, s + 10, s + 10);
-          fsIcon.moveTo(cx, cy - s/2 - 5); fsIcon.lineTo(cx, cy - s/2 - 10);
-          fsIcon.moveTo(cx + s/2 + 10, cy); fsIcon.lineTo(cx + s/2 + 15, cy);
-          fsIcon.moveTo(cx, cy + s/2 + 5); fsIcon.lineTo(cx, cy + s/2 + 10);
-          fsIcon.moveTo(cx - s/2 - 10, cy); fsIcon.lineTo(cx - s/2 - 15, cy);
-        } else {
-          // Four corners pointing in
-          fsIcon.strokeRect(cx - s/2 - 5, cy - s/2 - 5, s + 10, s + 10);
-          fsIcon.moveTo(cx - s/2 - 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy - s/2 - 5);
-          fsIcon.moveTo(cx + s/2 + 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy - s/2 - 5);
-          fsIcon.moveTo(cx - s/2 - 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy + s/2 + 5);
-          fsIcon.moveTo(cx + s/2 + 5, cy); fsIcon.lineTo(cx, cy); fsIcon.lineTo(cx, cy + s/2 + 5);
-        }
-      };
-      drawIcon(false);
+
+      // Show "F" key hint on desktop, simple icon on mobile.
+      var fsText = this.add.text(350, 11, isMobile ? '' : 'F', {
+        fontFamily: 'monospace',
+        fontSize: '10px',
+        color: '#ffffff',
+        align: 'center'
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(2);
+
       this.fullscreenBtn.on('pointerdown', function () {
-        // Fullscreen API requires a trusted user gesture; pointerdown qualifies.
         var promise = self.scale.isFullscreen ? self.scale.stopFullscreen() : self.scale.startFullscreen();
         if (promise && promise.catch) promise.catch(function () {});
       });
       self.scale.on('fullscreenchange', function () {
-        drawIcon(self.scale.isFullscreen);
+        fsText.setText(self.scale.isFullscreen ? (isMobile ? '' : 'F') : (isMobile ? '' : 'F'));
       });
+
+      // On mobile, request fullscreen automatically after first user interaction.
+      if (isMobile) {
+        var requested = false;
+        var requestFullscreen = function () {
+          if (!requested && !self.scale.isFullscreen) {
+            requested = true;
+            var p = self.scale.startFullscreen();
+            if (p && p.catch) p.catch(function () {});
+          }
+        };
+        // Request on first touch/click anywhere.
+        self.input.once('pointerdown', requestFullscreen);
+        // Also try when the scene is shown (covers keyboard F11 etc).
+        self.events.once('wake', requestFullscreen);
+      }
     },
 
     /** A label whose value is rebuilt on demand, not every frame. */
@@ -260,7 +263,8 @@ window.JA = window.JA || {};
         .setDepth(depth)
         .setVisible(false);
 
-      var card = this.add.rectangle(200, 120, 250, 176, 0xf8f0d0)
+      // Move card up by 20px so bottom buttons have more margin.
+      var card = this.add.rectangle(200, 100, 250, 176, 0xf8f0d0)
         .setScrollFactor(0)
         .setStrokeStyle(3, 0x8a5a28)
         .setDepth(depth + 0.1)
@@ -314,7 +318,7 @@ window.JA = window.JA || {};
 
       this.showPanel(panel);
 
-      panel.items.push(JA.font.text(this, 200, 46, 'PAUSA', {
+      panel.items.push(JA.font.text(this, 200, 26, 'PAUSA', {
         size: 3, originX: 0.5, tint: 0x30200c, shadow: 0xf8f0d0
       }).setDepth(panel.depth + 0.2));
 
@@ -325,22 +329,22 @@ window.JA = window.JA || {};
         'SALTAR   W O ARRIBA',
         'DISPARAR ESPACIO O J'
       ].forEach(function (line, i) {
-        panel.items.push(JA.font.text(this, 200, 82 + i * 15, line, {
+        panel.items.push(JA.font.text(this, 200, 62 + i * 15, line, {
           size: 1, originX: 0.5, tint: 0x6a5a40
         }).setDepth(panel.depth + 0.2));
       }, this);
 
-      panel.items.push(this.addPanelButton(panel, 200, 146, 'SEGUIR JUGANDO', function () {
+      panel.items.push(this.addPanelButton(panel, 200, 126, 'SEGUIR JUGANDO', function () {
         self.game$.togglePause();
       }));
 
-      panel.items.push(this.addPanelButton(panel, 200, 172, 'REPETIR CUADRA', function () {
+      panel.items.push(this.addPanelButton(panel, 200, 152, 'REPETIR CUADRA', function () {
         self.hidePause();
         self.game$.clearPause();
         self.game$.restartLevel();
       }));
 
-      panel.items.push(this.addPanelButton(panel, 200, 198, 'SALIR AL MAPA', function () {
+      panel.items.push(this.addPanelButton(panel, 200, 178, 'SALIR AL MAPA', function () {
         self.game$.clearPause();
         self.game$.goToMap();
       }));

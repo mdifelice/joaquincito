@@ -147,18 +147,20 @@ window.JA = window.JA || {};
       var backdrop = this.add.rectangle(200, 120, 400, 240, 0x000000, 0.6).setInteractive();
       backdrop.setDepth(20);
 
-      var panel = this.add.rectangle(200, 120, 280, 140, 0xf8f0d0).setStrokeStyle(3, 0x8a5a28).setDepth(21);
+      // Wider panel so labels and bars fit without overflow.
+      var panel = this.add.rectangle(200, 120, 320, 160, 0xf8f0d0).setStrokeStyle(3, 0x8a5a28).setDepth(21);
 
-      var title = JA.font.text(this, 200, 60, 'AJUSTES', { size: 2, originX: 0.5, tint: 0x30200c }).setDepth(22);
+      var title = JA.font.text(this, 200, 52, 'AJUSTES', { size: 2, originX: 0.5, tint: 0x30200c }).setDepth(22);
 
-      // Labels aligned with bars (left of bar).
-      var labelX = 80, barX = 130;
-      JA.font.text(this, labelX, 92, 'MUSICA', { size: 1, originX: 1, originY: 0.5, tint: 0x30200c }).setDepth(22);
-      JA.font.text(this, labelX, 120, 'SONIDOS', { size: 1, originX: 1, originY: 0.5, tint: 0x30200c }).setDepth(22);
+      // Labels centered over their bars.
+      var centerX = 200;
+      JA.font.text(this, centerX, 84, 'MUSICA', { size: 1, originX: 0.5, tint: 0x30200c }).setDepth(22);
+      JA.font.text(this, centerX, 116, 'SONIDOS', { size: 1, originX: 0.5, tint: 0x30200c }).setDepth(22);
 
       // Volume bars: eleven little squares, clicked to set a level.
       var STEPS = 11;
       var STEP_X = 8;
+      var barX = centerX - (STEPS - 1) * STEP_X / 2;
 
       var makeBar = function (x, y, onPick) {
         var cells = [];
@@ -187,13 +189,13 @@ window.JA = window.JA || {};
         return redraw;
       };
 
-      var musicBar = makeBar(barX, 92, function (v) {
+      var musicBar = makeBar(barX, 96, function (v) {
         JA.save.setMusicVolume(v);
         JA.audio.setMusicVolume(v);
       });
       musicBar(settings.music);
 
-      var sfxBar = makeBar(barX, 120, function (v) {
+      var sfxBar = makeBar(barX, 128, function (v) {
         JA.save.setSfxVolume(v);
         JA.audio.setSfxVolume(v);
         JA.audio.play('coin');
@@ -201,8 +203,8 @@ window.JA = window.JA || {};
       sfxBar(settings.sfx);
 
       // Back button.
-      var back = this.add.rectangle(200, 160, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
-      JA.font.text(this, 200, 160, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
+      var back = this.add.rectangle(200, 168, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
+      JA.font.text(this, 200, 168, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
       back.setInteractive();
       back.on('pointerdown', function () {
         JA.audio.play('back');
