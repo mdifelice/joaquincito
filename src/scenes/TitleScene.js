@@ -189,14 +189,14 @@ window.JA = window.JA || {};
         return redraw;
       };
 
-      // Bars moved down 30px from labels for clear separation.
-      var musicBar = makeBar(barX, 126, function (v) {
+      // Bars moved down 20px from labels for clear separation.
+      var musicBar = makeBar(barX, 104, function (v) {
         JA.save.setMusicVolume(v);
         JA.audio.setMusicVolume(v);
       });
       musicBar(settings.music);
 
-      var sfxBar = makeBar(barX, 158, function (v) {
+      var sfxBar = makeBar(barX, 136, function (v) {
         JA.save.setSfxVolume(v);
         JA.audio.setSfxVolume(v);
         JA.audio.play('coin');

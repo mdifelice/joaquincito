@@ -261,8 +261,10 @@ window.JA = window.JA || {};
         .setDepth(depth)
         .setVisible(false);
 
-      // Move card up by 40px so bottom buttons have more margin from edge.
-      var card = this.add.rectangle(200, 80, 250, 176, 0xf8f0d0)
+      // Card centered vertically with extra bottom padding (moved down 20px from center).
+      // Height 176, so bottom at 120 + 176/2 + 20 = 228. Top at 228 - 176 = 52.
+      // Center at y=140 gives bottom margin from screen edge.
+      var card = this.add.rectangle(200, 140, 250, 176, 0xf8f0d0)
         .setScrollFactor(0)
         .setStrokeStyle(3, 0x8a5a28)
         .setDepth(depth + 10)  // Higher depth so level header never overlaps
@@ -316,33 +318,34 @@ window.JA = window.JA || {};
 
       this.showPanel(panel);
 
-      panel.items.push(JA.font.text(this, 200, 26, 'PAUSA', {
+      // Card is centered at y=140 (height 176, so top=52, bottom=228).
+      // Position content with good bottom padding.
+      panel.items.push(JA.font.text(this, 200, 86, 'PAUSA', {
         size: 3, originX: 0.5, tint: 0x30200c, shadow: 0xf8f0d0
       }).setDepth(panel.depth + 0.2));
 
-      // Controls live here, not only in the touch pad, so a keyboard player has
-      // somewhere to look up what to press — in particular how to throw.
+      // Controls live here, not only in the touch pad.
       [
         'MOVER    FLECHAS O A D',
         'SALTAR   W O ARRIBA',
         'DISPARAR ESPACIO O J'
       ].forEach(function (line, i) {
-        panel.items.push(JA.font.text(this, 200, 62 + i * 15, line, {
+        panel.items.push(JA.font.text(this, 200, 122 + i * 15, line, {
           size: 1, originX: 0.5, tint: 0x6a5a40
         }).setDepth(panel.depth + 0.2));
       }, this);
 
-      panel.items.push(this.addPanelButton(panel, 200, 126, 'SEGUIR JUGANDO', function () {
+      panel.items.push(this.addPanelButton(panel, 200, 168, 'SEGUIR JUGANDO', function () {
         self.game$.togglePause();
       }));
 
-      panel.items.push(this.addPanelButton(panel, 200, 152, 'REPETIR CUADRA', function () {
+      panel.items.push(this.addPanelButton(panel, 200, 194, 'REPETIR CUADRA', function () {
         self.hidePause();
         self.game$.clearPause();
         self.game$.restartLevel();
       }));
 
-      panel.items.push(this.addPanelButton(panel, 200, 178, 'SALIR AL MAPA', function () {
+      panel.items.push(this.addPanelButton(panel, 200, 220, 'SALIR AL MAPA', function () {
         self.game$.clearPause();
         self.game$.goToMap();
       }));
