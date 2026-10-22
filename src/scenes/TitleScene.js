@@ -204,8 +204,8 @@ window.JA = window.JA || {};
       sfxBar(settings.sfx);
 
       // Back button.
-      var back = this.add.rectangle(200, 200, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
-      JA.font.text(this, 200, 200, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
+      var back = this.add.rectangle(200, 180, 90, 20, 0xe8603c).setStrokeStyle(2, 0x8a2c14).setDepth(22);
+      JA.font.text(this, 200, 180, 'VOLVER', { size: 1, originX: 0.5, originY: 0.5, tint: 0xffffff }).setDepth(23);
       back.setInteractive();
       back.on('pointerdown', function () {
         JA.audio.play('back');

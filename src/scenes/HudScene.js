@@ -319,10 +319,12 @@ window.JA = window.JA || {};
       this.showPanel(panel);
 
       // Card is centered at y=140 (height 176, so top=52, bottom=228).
-      // Position content with good bottom padding.
+      // Content depth must be above card's depth+10.
+      var contentDepth = panel.depth + 11;
+
       panel.items.push(JA.font.text(this, 200, 86, 'PAUSA', {
         size: 3, originX: 0.5, tint: 0x30200c, shadow: 0xf8f0d0
-      }).setDepth(panel.depth + 0.2));
+      }).setDepth(contentDepth));
 
       // Controls live here, not only in the touch pad.
       [
@@ -332,7 +334,7 @@ window.JA = window.JA || {};
       ].forEach(function (line, i) {
         panel.items.push(JA.font.text(this, 200, 122 + i * 15, line, {
           size: 1, originX: 0.5, tint: 0x6a5a40
-        }).setDepth(panel.depth + 0.2));
+        }).setDepth(contentDepth));
       }, this);
 
       panel.items.push(this.addPanelButton(panel, 200, 168, 'SEGUIR JUGANDO', function () {
